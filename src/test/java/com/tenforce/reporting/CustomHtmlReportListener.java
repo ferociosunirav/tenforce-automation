@@ -80,7 +80,7 @@ public class CustomHtmlReportListener implements ISuiteListener {
                 skippedCount++;
             }
 
-            testCasesMarkup.append(buildTestCaseSection(result));
+            testCasesMarkup.append(buildTestCaseRow(result));
         }
 
         return """
@@ -152,19 +152,13 @@ public class CustomHtmlReportListener implements ISuiteListener {
                         margin: 28px 0 14px;
                         font-size: 22px;
                     }
-                    .card {
-                        padding: 22px;
-                        margin-bottom: 18px;
-                    }
-                    .case-header {
-                        display: flex;
-                        justify-content: space-between;
-                        gap: 16px;
-                        align-items: flex-start;
-                        margin-bottom: 14px;
+                    .table-wrap {
+                        overflow-x: auto;
+                        padding: 0;
                     }
                     .badge {
-                        padding: 8px 12px;
+                        display: inline-block;
+                        padding: 6px 10px;
                         border-radius: 999px;
                         font-size: 12px;
                         font-weight: 700;
@@ -174,43 +168,57 @@ public class CustomHtmlReportListener implements ISuiteListener {
                     .passed { background: var(--passed); }
                     .failed { background: var(--failed); }
                     .skipped { background: var(--skipped); }
-                    .meta {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                        gap: 10px;
-                        margin: 14px 0 18px;
+                    table {
+                        width: 100%%;
+                        border-collapse: collapse;
+                        min-width: 1100px;
                     }
-                    .meta div {
-                        border: 1px solid var(--border);
-                        border-radius: 12px;
-                        padding: 12px;
-                        background: #fff;
+                    thead {
+                        background: #f2ece0;
                     }
-                    .meta span {
-                        display: block;
+                    th, td {
+                        padding: 14px 16px;
+                        border-bottom: 1px solid var(--border);
+                        vertical-align: top;
+                        text-align: left;
+                    }
+                    th {
                         font-size: 12px;
-                        color: var(--muted);
-                        margin-bottom: 4px;
                         text-transform: uppercase;
-                        letter-spacing: 0.06em;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
                     }
-                    ol {
+                    tbody tr:nth-child(even) {
+                        background: #fffcf6;
+                    }
+                    .test-name {
+                        font-weight: 700;
+                        margin-bottom: 4px;
+                    }
+                    .test-class {
+                        color: var(--muted);
+                        font-size: 13px;
+                    }
+                    .steps {
                         margin: 0;
-                        padding-left: 22px;
+                        padding-left: 18px;
                     }
-                    li {
+                    .steps li {
                         margin: 0 0 8px;
                         line-height: 1.5;
                     }
                     .error-box {
-                        margin-top: 18px;
                         border: 1px solid #e3b1af;
                         background: #fff4f3;
                         border-radius: 12px;
-                        padding: 14px;
+                        padding: 10px 12px;
                         white-space: pre-wrap;
                         font-family: Consolas, monospace;
                         font-size: 13px;
+                    }
+                    .empty {
+                        color: var(--muted);
+                        font-style: italic;
                     }
                 </style>
             </head>
@@ -239,7 +247,24 @@ public class CustomHtmlReportListener implements ISuiteListener {
                         </div>
                     </section>
                     <h2 class="section-title">Test Cases</h2>
-                    %s
+                    <section class="hero table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Test Case</th>
+                                    <th>Started</th>
+                                    <th>Finished</th>
+                                    <th>Duration</th>
+                                    <th>Execution Steps</th>
+                                    <th>Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                %s
+                            </tbody>
+                        </table>
+                    </section>
                 </div>
             </body>
             </html>
@@ -253,54 +278,33 @@ public class CustomHtmlReportListener implements ISuiteListener {
         );
     }
 
-    private String buildTestCaseSection(ITestResult result) {
+    private String buildTestCaseRow(ITestResult result) {
         String statusLabel = getStatusLabel(result.getStatus());
         String statusCssClass = statusLabel.toLowerCase();
-        String throwableMarkup = "";
-
-        if (result.getThrowable() != null) {
-            throwableMarkup = """
-                <div class="error-box">%s</div>
-                """.formatted(escapeHtml(result.getThrowable().toString()));
-        }
 
         return """
-            <section class="card">
-                <div class="case-header">
-                    <div>
-                        <h3>%s</h3>
-                        <p class="subtitle">%s</p>
-                    </div>
-                    <span class="badge %s">%s</span>
-                </div>
-                <div class="meta">
-                    <div>
-                        <span>Started</span>
-                        <strong>%s</strong>
-                    </div>
-                    <div>
-                        <span>Finished</span>
-                        <strong>%s</strong>
-                    </div>
-                    <div>
-                        <span>Duration</span>
-                        <strong>%d ms</strong>
-                    </div>
-                </div>
-                <h3>Execution Steps</h3>
-                %s
-                %s
-            </section>
+            <tr>
+                <td><span class="badge %s">%s</span></td>
+                <td>
+                    <div class="test-name">%s</div>
+                    <div class="test-class">%s</div>
+                </td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%d ms</td>
+                <td>%s</td>
+                <td>%s</td>
+            </tr>
             """.formatted(
-            escapeHtml(result.getMethod().getMethodName()),
-            escapeHtml(result.getTestClass().getName()),
             statusCssClass,
             statusLabel,
+            escapeHtml(result.getMethod().getMethodName()),
+            escapeHtml(result.getTestClass().getName()),
             formatTime(result.getStartMillis()),
             formatTime(result.getEndMillis()),
             Math.max(result.getEndMillis() - result.getStartMillis(), 0),
             buildStepList(result),
-            throwableMarkup
+            buildThrowableMarkup(result)
         );
     }
 
@@ -308,15 +312,25 @@ public class CustomHtmlReportListener implements ISuiteListener {
     private String buildStepList(ITestResult result) {
         Object stepLogsAttribute = result.getAttribute("stepLogs");
         if (!(stepLogsAttribute instanceof List<?> stepLogs) || stepLogs.isEmpty()) {
-            return "<p class=\"subtitle\">No step logs were captured for this test case.</p>";
+            return "<span class=\"empty\">No step logs were captured for this test case.</span>";
         }
 
-        StringBuilder stepsMarkup = new StringBuilder("<ol>");
+        StringBuilder stepsMarkup = new StringBuilder("<ol class=\"steps\">");
         for (Object step : stepLogs) {
             stepsMarkup.append("<li>").append(escapeHtml(String.valueOf(step))).append("</li>");
         }
         stepsMarkup.append("</ol>");
         return stepsMarkup.toString();
+    }
+
+    private String buildThrowableMarkup(ITestResult result) {
+        if (result.getThrowable() == null) {
+            return "<span class=\"empty\">None</span>";
+        }
+
+        return """
+            <div class="error-box">%s</div>
+            """.formatted(escapeHtml(result.getThrowable().toString()));
     }
 
     private String getStatusLabel(int status) {
