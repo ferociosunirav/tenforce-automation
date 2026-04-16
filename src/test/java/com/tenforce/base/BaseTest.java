@@ -61,7 +61,10 @@ public abstract class BaseTest {
     }
 
     private boolean isHeadlessEnabled() {
-        String headlessValue = System.getenv("HEADLESS");
+        String headlessValue = System.getProperty("HEADLESS");
+        if (headlessValue == null || headlessValue.isBlank()) {
+            headlessValue = System.getenv("HEADLESS");
+        }
         return headlessValue != null && headlessValue.equalsIgnoreCase("true");
     }
 }
