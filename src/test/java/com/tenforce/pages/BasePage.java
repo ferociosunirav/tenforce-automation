@@ -31,6 +31,10 @@ public abstract class BasePage {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
+    protected WebElement waitForPresentElement(By locator) {
+        return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+    }
+
     protected void waitUntilClickable(WebElement element) {
         wait.until(ExpectedConditions.elementToBeClickable(element));
     }
@@ -82,5 +86,11 @@ public abstract class BasePage {
             Thread.currentThread().interrupt();
             logStep("Pause interrupted: " + interruptedException.getMessage());
         }
+    }
+
+    protected void scrollToBottomOfPage() {
+        logStep("Scrolling to the bottom of the page");
+        ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
+        logStep("Reached the bottom of the page");
     }
 }

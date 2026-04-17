@@ -8,12 +8,15 @@ import org.openqa.selenium.WebElement;
 public class HomePage extends BasePage {
 
     private static final String BASE_URL = "https://www.tenforce.com/";
+    private static final String CAREER_URL = "https://www.tenforce.com/career/";
+    private static final String CAREER_PEOPLE_URL = "https://www.tenforce.com/career/#people";
+    private static final String CAREER_JOB_URL = "https://www.tenforce.com/career/#job";
+    private static final String LIFE_OF_TWO_INTERNS_URL = "https://www.tenforce.com/people-life/life-of-two-interns/";
 
     private final By cookieButtonLocator = By.xpath(
         "//button[normalize-space()='I Agree' or normalize-space()='I agree' or contains(normalize-space(), 'Accept')]"
         + " | //a[normalize-space()='I Agree' or normalize-space()='I agree' or contains(normalize-space(), 'Accept')]"
     );
-
     public HomePage(WebDriver driver) {
         super(driver);
     }
@@ -48,10 +51,55 @@ public class HomePage extends BasePage {
         return this;
     }
 
+    public HomePage openCareerPage() {
+        logStep("Navigating to career page: " + CAREER_URL);
+        driver.get(CAREER_URL);
+        logStep("Career page opened successfully");
+        waitForPageBody();
+        return this;
+    }
+
+    public HomePage openCareerPeoplePage() {
+        logStep("Navigating to career people section: " + CAREER_PEOPLE_URL);
+        driver.get(CAREER_PEOPLE_URL);
+        logStep("Career people section opened successfully");
+        waitForPageBody();
+        logStep("Waiting 5 seconds on the career people section");
+        pauseForDemo(5000);
+        return this;
+    }
+
+    public HomePage openLifeOfTwoInternsPage() {
+        logStep("Navigating to life of two interns page: " + LIFE_OF_TWO_INTERNS_URL);
+        driver.get(LIFE_OF_TWO_INTERNS_URL);
+        logStep("Life of two interns page opened successfully");
+        waitForPageBody();
+        logStep("Waiting 5 seconds on the life of two interns page");
+        pauseForDemo(5000);
+        scrollToBottomOfPage();
+        pauseForDemo(1500);
+        return this;
+    }
+
+    public HomePage openCareerJobPage() {
+        logStep("Navigating to career jobs section: " + CAREER_JOB_URL);
+        driver.get(CAREER_JOB_URL);
+        logStep("Career jobs section opened successfully");
+        waitForPageBody();
+        return this;
+    }
+
     public String getPageTitle() {
         logStep("Capturing page title");
         String title = driver.getTitle();
         logStep("Page title captured: " + title);
         return title;
+    }
+
+    public String getCurrentUrl() {
+        logStep("Capturing current URL");
+        String currentUrl = driver.getCurrentUrl();
+        logStep("Current URL captured: " + currentUrl);
+        return currentUrl;
     }
 }
